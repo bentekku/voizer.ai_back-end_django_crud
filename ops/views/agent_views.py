@@ -20,35 +20,36 @@ class AgentList(APIView):
 
 class AgentDetail(APIView):
     # instead of pk=pk, which takes in (id) and compares it with request's id; switched to voice_id, which is always unique to user
-    def get(self, request, pk):
+    def get_object(self, voice_id):
         try:
-            agent = Agent.objects.get(voice_id=pk)
+            return Agent.objects.get(voice_id=voice_id)
         except Agent.DoesNotExist:
             return Response(
                 {"error": "Agent not found"}, status=status.HTTP_404_NOT_FOUND
             )
+
+    def get(self, request, pk):  # Here `pk` is the `voice_id`
+        agent = self.get_object(pk)  # Use `voice_id` to get the agent
         serializer = AgentSerializer(agent)
         return Response(serializer.data)
 
-    def put(self, request, pk):
-        try:
-            agent = Agent.objects.get(voice_id=pk)
-        except Agent.DoesNotExist:
-            return Response(
-                {"error": "Agent not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+    def put(self, request, pk):  # Here `pk` is the `voice_id`
+        agent = self.get_object(pk)  # Query using `voice_id`
         serializer = AgentSerializer(agent, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk):
-        try:
-            agent = Agent.object.get(voice_id=pk)
-        except Agent.DoesNotExist:
-            return Response(
-                {"error": "Agent not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+    def patch(self, request, pk):
+        agent = self.get_object(pk)
+        serializer = AgentSerializer(agent, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):  # `pk` is still `voice_id`
+        agent = self.get_object(pk)  # Delete using `voice_id`
         agent.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

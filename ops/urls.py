@@ -12,11 +12,11 @@ urlpatterns = [
     path("campaigns/<str:pk>/", CampaignDetail.as_view(), name="campaign-detail"),
     # CampaignResults URLs
     path(
-        "campaignresults/", CampaignResultsList.as_view(), name="campaignresults-list"
+        "campaign-results/", CampaignResultsList.as_view(), name="campaign-results-list"
     ),
     path(
-        "campaignresults/<str:pk>/",
+        "campaign-results/<str:pk>/",
         CampaignResultsDetail.as_view(),
-        name="campaignresults-detail",
+        name="campaign-results-detail",
     ),
 ]

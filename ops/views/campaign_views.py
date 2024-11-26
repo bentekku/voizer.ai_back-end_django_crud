@@ -20,35 +20,38 @@ class CampaignList(APIView):
 
 
 class CampaignDetail(APIView):
-    def get(self, request, pk):
+    def get_object(self, pk):
         try:
-            campaign = Campaign.objects.get(pk=pk)
+            return Campaign.objects.get(pk=pk)
         except Campaign.DoesNotExist:
             return Response(
                 {"error": "Campaign not found"}, status=status.HTTP_404_NOT_FOUND
             )
+
+    def get(self, request, pk):
+        campaign = self.get_object(pk)
         serializer = CampaignSerializer(campaign)
         return Response(serializer.data)
 
     def put(self, request, pk):
-        try:
-            campaign = Campaign.objects.get(pk=pk)
-        except Campaign.DoesNotExist:
-            return Response(
-                {"error": "Campaign not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+        campaign = self.get_object(pk)
+
         serializer = CampaignSerializer(campaign, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        campaign = self.get_object(pk)
+
+        serializer = CampaignSerializer(campaign, data=request.data, partial=True)
+        if serializer.is_valid():
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        try:
-            campaign = Campaign.objects.get(pk=pk)
-        except Campaign.DoesNotExist:
-            return Response(
-                {"error": "Campaign not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+        campaign = self.get_object(pk)
+
         campaign.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
