@@ -1,8 +1,22 @@
 from django.urls import path
-from .views import Agent, Campaign, CampaignResults
+from .views.agent_views import AgentList, AgentDetail
+from .views.campaign_views import CampaignList, CampaignDetail
+from .views.campaign_results_views import CampaignResultsList, CampaignResultsDetail
 
 urlpatterns = [
-    path("agents/", Agent),
-    path("campaigns/", Campaign),
-    path("campaign-results/", CampaignResults),
+    # Agent URLs
+    path("agents/", AgentList.as_view(), name="agent-list"),
+    path("agents/<str:pk>/", AgentDetail.as_view(), name="agent-detail"),
+    # Campaign URLs
+    path("campaigns/", CampaignList.as_view(), name="campaign-list"),
+    path("campaigns/<str:pk>/", CampaignDetail.as_view(), name="campaign-detail"),
+    # CampaignResults URLs
+    path(
+        "campaignresults/", CampaignResultsList.as_view(), name="campaignresults-list"
+    ),
+    path(
+        "campaignresults/<str:pk>/",
+        CampaignResultsDetail.as_view(),
+        name="campaignresults-detail",
+    ),
 ]
